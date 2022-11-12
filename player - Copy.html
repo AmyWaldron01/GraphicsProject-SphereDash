@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+    </style>
+
+
+</head>
+
+<body>
+    <h1>Amy</h1>
+
+    <script type="text/javascript">
+
+        //Varibles for the sphere
+        var x, y, z;
+        var plane;
+        var xpostion, ypostion, zpostion;
+        var geometry, material, sphere;
+        var scene = new THREE.Scene();
+        var renderer = new THREE.WebGLRenderer();
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        //speeds
+        var xspeed = 0.3;
+
+        //Varibles for the cube
+        var cubeGeom, material3;
+        var cube;
+        var cubeypostion;
+
+
+
+        //Sphere class
+        class Sphere {
+            constructor(x, y, z) {
+                this.x = x; //Radius
+                this.y = y;//Wdith segements
+                this.z = z;//Height segemnts
+                // this.sphere.castShadow = true;
+
+                geometry = new THREE.SphereGeometry(this.x, this.y, this.z);
+                material = new THREE.MeshLambertMaterial({ color: 0xffff00 });//Change to MeshLambertMaterial ///Doesnt work
+            }
+
+            draw() {
+                sphere = new THREE.Mesh(geometry, material);
+                sphere.position.x = 0;//forward anc back
+                sphere.position.y = 10;//up and down
+                sphere.position.z = 250;
+                sphere.castShadow = true;
+                scene.add(sphere);
+
+                //Wire Frame
+                const _wireframe2 = new THREE.WireframeGeometry(geometry);
+                const wireframe2 = new THREE.LineSegments(_wireframe2);
+                sphere.add(wireframe2);
+
+
+            }
+
+            //Jquery
+            jump() {
+
+                //keypresses with jQuery
+                $(document.body).on('keydown', function (e) {
+                    console.log(e.which);
+                    switch (e.which) {
+                        // key code for space bar
+                        case 40:
+                            console.log('Going Down');
+                            sphere.position.x += 10;
+                            console.log(sphere.position.x);
+                            break;
+
+                        case 38:
+                            console.log('Going Up');
+                            sphere.position.x += -10;
+                            console.log(sphere.position.x);
+                            break;
+
+                    }
+                });
+            }
+
+
+        }//end of class
+
+        //cube class
+        class Cube {
+            constructor(r, w, h, postionZ, x, y, z) {
+                this.r = r; //Radius
+                this.w = w;//Wdith segements
+                this.h = h;//Height segemnts
+                this.positionZ = postionZ;
+                // this.sphere.castShadow = true;
+                this.x = x;
+                this.y = y;
+                this.z = z;
+
+
+                cubeGeom = new THREE.BoxGeometry(this.r, this.w, this.h);
+                material3 = new THREE.MeshBasicMaterial({ color: 0x00ff00, opacity: 0.2, transparent: true });
+
+
+                this.cube = new THREE.Mesh(cubeGeom, material3);
+            }
+
+            draw() {
+                // cube.position.x= 0;//doesnt do anything
+                this.cube.position.y = 10;
+                // cube.position.z=0;
+                scene.add(this.cube);
+
+                this.cube.position.x = this.x;
+                this.cube.position.y = this.y;
+                this.cube.position.z = this.z;
+
+
+
+
+                // //wire frame to see better 
+                // const _wireframe = new THREE.EdgesGeometry(cubeGeom); // or WireframeGeometry( geometry )
+                // const wireframe = new THREE.LineSegments(_wireframe);
+                // wireframe.position.y = 10;
+                // scene.add(wireframe);
+
+                // for (var i = 0; i < 20; i++) {
+                //     this.cube = new THREE.Mesh(cubeGeom, material3);
+                //     this.cube.position.y = 10;
+                //     this.cube.position.z = this.cube.position.z = +50 - 100 * Math.random();
+                //     scene.add(this.cube);
+
+                // }
+
+
+            }
+
+            move() {
+                this.cube.position.z += xspeed;
+
+
+
+            }
+
+        }//end of cube class
+
+
+        //function set up
+        function setUp() {
+
+            //Render stuff
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            document.body.appendChild(renderer.domElement);
+
+
+            //Adding a spotlight
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(20, 400, 0);
+
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+
+            // Ambient Light
+            var light = new THREE.AmbientLight(0xffffff);
+            light.intensity = 0.25;
+            scene.add(light);
+
+            //to help see where you are 
+            const axesHelper = new THREE.AxesHelper(100);
+            scene.add(axesHelper)
+
+            //All camera stuff
+            //Camera
+            camera.position.y = 200; //up and down
+            camera.position.x = 100;
+            camera.position.z = 0; //front and back
+            camera.lookAt(0, 0, 0);
+
+            helper = new THREE.CameraHelper(spotLight.shadow.camera);
+
+            //Render adding
+            //renderer.render(scene, camera);
+        }
+
+        //Plane
+        function plane() {
+            //add a Plane(flat surface)
+            const geometry2 = new THREE.PlaneGeometry(100, 600);//Changed from 50
+            const material2 = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+            plane = new THREE.Mesh(geometry2, material2);
+            scene.add(plane);
+            plane.position.x = 0;
+            plane.position.y = 0;
+            plane.position.z = 0;
+            plane.receiveShadow = true;
+
+
+            //moves the plane sideways
+            plane.rotation.x = -Math.PI / 2;
+
+
+        }
+
+        //creating array
+        let ccube = [];
+
+
+        //creating sphere
+        // makesCube = new Cube(60, 20, 20, -20, 10, 10, 200);
+        // makesCube.draw();
+
+        ccube[0] = new Cube(60, 20, 20, -20, 10, 10, 200);
+        ccube[0].draw();
+
+
+        //cube 2
+        // makesCube2 = new Cube(60, 20, 20, -20, 5, 10, 100);
+        // makesCube2.draw();
+
+        ccube[1] = new Cube(60, 20, 20, -20, 5, 10, 100);
+        ccube[1].draw();
+
+        //cube 3
+        // makesCube3 = new Cube(60, 20, 20, -20, -5, 10, 40);
+        // makesCube3.draw();
+
+        ccube[2] = new Cube(60, 20, 20, -20, -5, 10, 40);
+        ccube[2].draw();
+
+        //cube 4
+        // makesCube4 = new Cube(60, 20, 20, -20, 10, 10, -25);
+        // makesCube4.draw();
+
+        ccube[3] = new Cube(60, 20, 20, -20, 10, 10, -25);
+        ccube[3].draw();
+
+        //cube 5
+        // makesCube5 = new Cube(60, 20, 20, -20, -5, 10, -95);
+        // makesCube5.draw();
+
+        ccube[4] = new Cube(60, 20, 20, -20, -5, 10, -95);
+        ccube[4].draw();
+
+        //cube 6
+        // makesCube6 = new Cube(60, 20, 20, -20, 15, 10, -180);
+        // makesCube6.draw();
+
+        ccube[5] = new Cube(60, 20, 20, -20, 15, 10, -180);
+        ccube[5].draw();
+
+        function animate() {
+
+            //Moving left to right
+            plane.position.z += xspeed;//-----------------------------------
+
+            //making cube follow the plane
+            // makesCube.move();
+            ccube[0].move();
+
+            //making cube2 follow the plane
+            // makesCube2.move();
+            ccube[1].move();
+
+            //making cube3 follow the plane
+            // makesCube3.move();
+            ccube[2].move();
+
+            //making cube4 follow the plane
+            // makesCube4.move();
+            ccube[3].move();
+
+            //making cube5 follow the plane
+            // makesCube5.move();
+            ccube[4].move();
+
+            //making cube5 follow the plane
+            // makesCube6.move();
+            ccube[5].move();
+
+
+
+            // if (sphere.position.z > 140 - 5) {
+            //     sphere.position.z = 140 - 5;
+            // }
+
+            // if (sphere.position.z < -140 - 5) {
+            //     sphere.position.z = -140;
+            // }
+
+
+
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        };
+
+        //Collission
+        function collision() {
+
+            for (let i = 0; i < ccube.length; i++) {
+
+                //seeing sphere hits cube
+                for (let o = 0; o < ccube.length; o++) {
+
+                    if (this.sphere.position.x <= (ccube[o].position.x)) {
+                        console.log("Collision");
+                    }
+
+                }
+            }
+
+
+
+        }
+
+
+        //caling setup
+        setUp();
+        plane();
+
+
+        // //Creating a sphere
+        makesSphere = new Sphere(10, 32, 16);
+        makesSphere.draw();
+        makesSphere.jump();
+        animate();
+    </script>
+</body>
+
+</html>
